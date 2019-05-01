@@ -4,10 +4,9 @@ astrouncertainties
 A wrapper to combine the uncertainties package with astropy units.
 
 
-Requires:
-
-> astropy 
-> uncertainties
+Requires:<br>
+astropy <br>
+uncertainties <br>
 
 AUVariable
 --------------
