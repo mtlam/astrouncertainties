@@ -13,6 +13,14 @@ def split(x):
 
 class AUVariable:
     def __init__(self,value,std_dev,unit):
+        """
+        Primary class for handling values and their associated errors, with units attached
+
+        Parameters:
+        value: either a float or a list/numpy array
+        std_dev: either a float or a list/numpy array, must match the former
+        unit: an astropy units or a string that will be read into an astropy unit
+        """
         if hasattr(value, "__iter__"):
             self.unc = unumpy.uarray(value,std_dev)
         else:
@@ -46,6 +54,12 @@ class AUVariable:
 
     
     def to(self,unit):
+        """
+        Converts the arrays to the new unit
+        """
+        if type(unit) == str:
+            unit = units.Unit(unit)
+
         v,s = split(self.unc)        
         conv_v = (v*self.unit).to(unit)
         conv_s = (s*self.unit).to(unit)
@@ -58,6 +72,9 @@ class AUVariable:
         return self
 
     def si(self):
+        """
+        Converts the arrays to SI units
+        """
         v,s = split(self.unc)
         conv_v = (v*self.unit).si
         conv_s = (s*self.unit).si
@@ -70,6 +87,9 @@ class AUVariable:
 
     
     def binop(self,other,op,convert=False):
+        """
+        Primary function for mathematical binary operators
+        """
         if isinstance(other,AUVariable):
             if convert:
                 other.to(self.unit)
@@ -86,10 +106,12 @@ class AUVariable:
         pass
     
     def get_value(self):
+        """ Returns the number/array of values """
         return split(self.unc)[0]
     get_values = get_value
 
     def get_std_dev(self):
+        """ Returns the number/array of errors """
         return split(self.unc)[1]
     get_std_devs = get_std_dev
 
