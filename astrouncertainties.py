@@ -13,7 +13,7 @@ def split(x):
 
 class AUVariable:
     def __init__(self,value,std_dev,unit):
-        if hasattr(N, "__iter__"):
+        if hasattr(value, "__iter__"):
             self.unc = unumpy.uarray(value,std_dev)
         else:
             self.unc = ufloat(value,std_dev)
@@ -78,6 +78,10 @@ class AUVariable:
         v,s = split(new_unc)
         return AUVariable(v,s,self.unit)
 
+
+    def compop(self,other,op):
+        pass
+    
     def get_value(self):
         return split(self.unc)[0]
     get_values = get_value
