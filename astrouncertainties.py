@@ -13,7 +13,7 @@ def split(x):
 
 class AUVariable:
     def __init__(self,value,std_dev,unit):
-        if hasattr(N, "__iter__)":
+        if hasattr(N, "__iter__"):
             self.unc = unumpy.uarray(value,std_dev)
         else:
             self.unc = ufloat(value,std_dev)
