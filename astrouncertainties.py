@@ -1,4 +1,3 @@
-import numpy as np
 import astropy.units as units
 import uncertainties
 from uncertainties import ufloat,unumpy
@@ -14,7 +13,7 @@ def split(x):
 
 class AUVariable:
     def __init__(self,value,std_dev,unit):
-        if isinstance(value,(list,np.ndarray)):
+        if hasattr(N, "__iter__)":
             self.unc = unumpy.uarray(value,std_dev)
         else:
             self.unc = ufloat(value,std_dev)
