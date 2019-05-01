@@ -17,7 +17,10 @@ class AUVariable:
             self.unc = unumpy.uarray(value,std_dev)
         else:
             self.unc = ufloat(value,std_dev)
-        self.unit = unit
+        if type(unit) == str:
+            self.unit = units.Unit(unit)
+        else:
+            self.unit = unit
 
     def __repr__(self):
         v,s = split(self.unc)
