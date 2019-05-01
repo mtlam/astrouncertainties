@@ -5,8 +5,9 @@ A wrapper to combine the uncertainties package with astropy units.
 
 
 Requires:
-: astropy
-: uncertainties
+
+> astropy
+> uncertainties
 
 AUVariable
 --------------
