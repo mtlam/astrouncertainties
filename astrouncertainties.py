@@ -88,7 +88,7 @@ class AUVariable:
         return False
 
     
-    def to(self,unit,save=True):
+    def to(self,unit,save=False):
         """
         Converts the arrays to the new unit
         """
@@ -109,7 +109,7 @@ class AUVariable:
         else:
             return AUVariable(conv_v.value,conv_s.value,unit)
 
-    def si(self,save=True):
+    def si(self,save=False):
         """
         Converts the arrays to SI units
         """
