@@ -37,7 +37,7 @@ class AUVariable:
         return "AUArray(%s,%s,%s)"%(repr(v),repr(s),repr(self.unit))
 
     def __str__(self):
-        return str(self.unc)+" %s"%str(self.unit)
+        return str(self.unc).replace("\n",",") +" %s"%str(self.unit)
 
     def __getitem__(self,key):
         if isinstance(self.unc,uncertainties.core.Variable):
@@ -66,14 +66,13 @@ class AUVariable:
     def __mul__(self,other):
         return self.binop(other,operator.mul)
     __imul__ = __mul__
-    __rmul__ = __mul__
-
+    __rmul__ = __mul__ 
     
     def __div__(self,other):
         return self.binop(other,operator.div)
     __idiv__ = __div__
     def __rdiv__(self,other):
-        return self.binop(other,(lambda x,y: y/x))#,unitfunc=lambda x: 1./x)
+        return self.binop(other,(lambda x,y: y/x))
 
     def __pow__(self,other): #works oddly if other has units
         return self.binop(other,operator.pow)
@@ -132,7 +131,6 @@ class AUVariable:
         """
         Primary function for mathematical binary operators
         """
-
         if isinstance(other,AUVariable):
             if convert:
                 other = other.to(self.unit,save=False)
@@ -145,7 +143,7 @@ class AUVariable:
                 other = other.to(self.unit)
             new_unc = op(self.unc,other.value)
             new_unit = op(self.get_values()[0],other).unit
-        else: 
+        else:
             new_unc = op(self.unc,other)
             new_unit = op(self.get_values(),other).unit
         v,s = split(new_unc)
@@ -155,6 +153,10 @@ class AUVariable:
 
     def compop(self,other,op):
         pass
+
+    def set_unit(self,unit):
+        """ Replace unit. Beware! """
+        self.unit = unit
     
     def get_value(self):
         """ Returns the number/array of values, with units """

@@ -3,6 +3,7 @@ astrouncertainties
 
 A wrapper to combine the uncertainties package with astropy units.
 
+BEWARE: there is still a problem with correlations, i.e., x - x**2 returns different errors than x * (1-x)
 
 **Requires**:<br>
 astropy <br>
