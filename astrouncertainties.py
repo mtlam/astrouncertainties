@@ -9,6 +9,8 @@ def split(x):
         return x.n,x.s
     else:
         return unumpy.nominal_values(x),unumpy.std_devs(x)
+
+
     
 
 class AUVariable:
@@ -52,8 +54,17 @@ class AUVariable:
     def __pow__(self,other): #works oddly if other has units
         return self.binop(other,operator.pow)
 
+
+    def __eq__(self,other):
+        other = other.to(self.unit,save=False)
+        v,s = split(self.unc)
+        ov,os = split(other.unc)
+        if reduce(lambda x,y: x and y,v == ov) and reduce(lambda x,y: x and y,s == os):
+            return True
+        return False
+
     
-    def to(self,unit):
+    def to(self,unit,save=True):
         """
         Converts the arrays to the new unit
         """
@@ -63,26 +74,33 @@ class AUVariable:
         v,s = split(self.unc)        
         conv_v = (v*self.unit).to(unit)
         conv_s = (s*self.unit).to(unit)
-        self.unit = conv_v.unit
 
-        if isinstance(self.unc,uncertainties.core.Variable):
-            self.unc = ufloat(conv_v.value,conv_s.value)
+        if save:
+            self.unit = unit
+            if isinstance(self.unc,uncertainties.core.Variable):
+                self.unc = ufloat(conv_v.value,conv_s.value)
+            else:
+                self.unc = unumpy.uarray(conv_v.value,conv_s.value)
+            return self
         else:
-            self.unc = unumpy.uarray(conv_v.value,conv_s.value)
-        return self
+            return AUVariable(conv_v.value,conv_s.value,unit)
 
-    def si(self):
+    def si(self,save=True):
         """
         Converts the arrays to SI units
         """
         v,s = split(self.unc)
         conv_v = (v*self.unit).si
         conv_s = (s*self.unit).si
-        if isinstance(self.unc,uncertainties.core.Variable):
-            self.unc = ufloat(conv_v.value,conv_s.value)
+        if save:
+            self.unit = conv_v.unit
+            if isinstance(self.unc,uncertainties.core.Variable):
+                self.unc = ufloat(conv_v.value,conv_s.value)
+            else:
+                self.unc = unumpy.uarray(conv_v.value,conv_s.value)
+            return self
         else:
-            self.unc = unumpy.uarray(conv_v.value,conv_s.value)
-        return self
+            return AUVariable(conv_v.value,conv_s.value,conv_v.unit)
         
 
     
@@ -92,7 +110,7 @@ class AUVariable:
         """
         if isinstance(other,AUVariable):
             if convert:
-                other.to(self.unit)
+                other = other.to(self.unit,save=False)
             new_unc = op(self.unc,other.unc)
         elif isinstance(other,units.quantity.Quantity):
             new_unc = op(self.unc,other.to(self.unit).value)
@@ -106,13 +124,13 @@ class AUVariable:
         pass
     
     def get_value(self):
-        """ Returns the number/array of values """
-        return split(self.unc)[0]
+        """ Returns the number/array of values, with units """
+        return split(self.unc)[0]*self.unit
     get_values = get_value
 
     def get_std_dev(self):
-        """ Returns the number/array of errors """
-        return split(self.unc)[1]
+        """ Returns the number/array of errors, with units """
+        return split(self.unc)[1]*self.unit
     get_std_devs = get_std_dev
 
     
