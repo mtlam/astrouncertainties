@@ -37,19 +37,43 @@ class AUVariable:
         return "AUArray(%s,%s,%s)"%(repr(v),repr(s),repr(self.unit))
 
     def __str__(self):
-        return str(self.unc)+"*%s"%str(self.unit)
+        return str(self.unc)+" %s"%str(self.unit)
+
+    def __getitem__(self,key):
+        if isinstance(self.unc,uncertainties.core.Variable):
+            raise TypeError("Internal value is not iterable")
+        return ufloat(split(self.unc)[0][key],split(self.unc)[1][key])
+
+    def __len__(self):
+        if isinstance(self.unc,uncertainties.core.Variable):
+            raise TypeError("Internal value is not iterable")
+        return len(self.unc)
+        
         
     def __add__(self,other):
         return self.binop(other,operator.add,convert=True)
+    __iadd__ = __add__
+    __radd__ = __add__
+
         
     def __sub__(self,other):
         return self.binop(other,operator.sub,convert=True)
+    __isub__ = __sub__
+    def __rsub__(self,other):
+        return self.binop(other,(lambda x,y: y-x))
 
+    
     def __mul__(self,other):
         return self.binop(other,operator.mul)
+    __imul__ = __mul__
+    __rmul__ = __mul__
 
+    
     def __div__(self,other):
         return self.binop(other,operator.div)
+    __idiv__ = __div__
+    def __rdiv__(self,other):
+        return self.binop(other,(lambda x,y: y/x))#,unitfunc=lambda x: 1./x)
 
     def __pow__(self,other): #works oddly if other has units
         return self.binop(other,operator.pow)
@@ -108,16 +132,25 @@ class AUVariable:
         """
         Primary function for mathematical binary operators
         """
+
         if isinstance(other,AUVariable):
             if convert:
                 other = other.to(self.unit,save=False)
+            # Calculate new uncertainties array
             new_unc = op(self.unc,other.unc)
+            # Calculate new units
+            new_unit = op(self.get_values()[0],other.get_values()[0]).unit
         elif isinstance(other,units.quantity.Quantity):
-            new_unc = op(self.unc,other.to(self.unit).value)
-        else: #Assume same units, which is against what astropy does
+            if convert:
+                other = other.to(self.unit)
+            new_unc = op(self.unc,other.value)
+            new_unit = op(self.get_values()[0],other).unit
+        else: 
             new_unc = op(self.unc,other)
+            new_unit = op(self.get_values(),other).unit
         v,s = split(new_unc)
-        return AUVariable(v,s,self.unit)
+        
+        return AUVariable(v,s,new_unit)
 
 
     def compop(self,other,op):
